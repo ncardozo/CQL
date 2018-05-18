@@ -2,9 +2,11 @@ const chevrotain = require("chevrotain")
 
 const createToken = chevrotain.createToken
 
+const tokenVocabulary = {}
+
 const Identifier = createToken({name: "Identifier", pattern: /[a-zA-Z]\w*/})
 const Select = createToken({
-      name: "Selecet",
+      name: "Select",
       pattern: /SELECT/,
       longer_alt: Identifier
 })
@@ -41,4 +43,14 @@ allTokens.forEach(tokenType => {
 
 module.exports = {
   tokenVocabulary: tokenVocabulary,
+
+  lexer: function(inputText){
+    const lexingResult = SelectLexer.tokenize(inputText)
+
+    if(lexingResult.errors.length > 0) {
+      throw Error("Lexing errors detected")
+    }
+
+    return lexingResult
+  }
 }
