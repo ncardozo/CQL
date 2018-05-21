@@ -23,7 +23,6 @@ const AtMost = createToken({name:"AtMostOne", pattern:/atMostOne/})
 const Equals = createToken({name:"Equals", pattern:/=/})
 const And = createToken({name: "And", pattern:/&/})
 const Or = createToken({name:"Or", pattern:/\|/})
-const Integer = createToken({name: "Integer", pattern: /0|[1-9]\d*/})
 
 //special characters
 const Comma = createToken({name: "Comma", pattern: /,/})
@@ -41,6 +40,7 @@ const Identifier = createToken({
   name: "Identifier",
   pattern: /[a-zA-Z]\w*/,
 })
+const Integer = createToken({name: "Integer", pattern: /0|[1-9]\d*/})
 
 let allTokens = [
   WhiteSpace, Activate, For, GreaterThan, LessThan, Between,
