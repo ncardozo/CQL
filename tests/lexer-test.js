@@ -1,7 +1,29 @@
 const lexer = require("../cql-lexer").lexer
 
-const contextActivation = "activate: Context1"
 
 //Test single context activation
+//This activation is global for all object instances
+const contextActivation = "activate: Context1"
 const singleContextResult = lexer(contextActivation)
-console.log(JSON.stringify(singleContextResult, null, "\t"))
+console.log("--SINGLE ACTIVATION\n" + JSON.stringify(singleContextResult, null, "\t"))
+
+//Single activation with name
+const contextActivation2 = "activate: name = Context1"
+const singleContext2Result = lexer(contextActivation2)
+console.log("--SINGLE KEYWORD ACTIVATION\n" + JSON.stringify(singleContextResult, null, "\t"))
+
+//Activate all contexts satisfying a range
+const rangeActivation = "activate: date between(20170412, 20170425)"
+const rangeResult = lexer(rangeActivation)
+console.log("--RANGE RESULT\n" + JSON.stringify(rangeResult, null, "\t"))
+
+//Activate a contexts for an object instance
+const instanceActivation = "activate: name = Landscape for: objInstance"
+const instanceResult = lexer(instanceActivation)
+console.log("--INSTANCE ACTIVATION\n" + JSON.stringify(instanceResult, null, "\t"))
+
+//Activate a contexts for an object instance
+//This activation is local to an object type
+const classActivation = "activate: name = Landscape for: Bus"
+const classResult = lexer(classActivation)
+console.log("--ALL INSTANCES ACTIVATION\n" + JSON.stringify(classResult, null, "\t"))
