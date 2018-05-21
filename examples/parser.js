@@ -81,11 +81,13 @@ module.exports = {
   parse: function(text) {
     const lexingResult = selectLexer.lexer(text)
     parserInstance.input = lexingResult.tokens
+    //const cstOutput = 
     parserInstance.selectStatement()
 
     if(parserInstance.errors.length > 0) {
       throw new Error("Parsing errors detected" + parserInstance.errors[0].message)
     } else {
+      //return cstOutput
       console.log("---OK. Expression parsed correctly")
     }
   }

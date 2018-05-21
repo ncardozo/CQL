@@ -1,10 +1,16 @@
 const lexer = require("./lexer").lexer
 const parser = require("./parser")
+const visitor = require("./cst_visitor")
 
-const inputText = "SELECT column1 FROM table2"
+//const inputText = "SELECT column1, column2 FROM table2 WHERE column2 > 3"
 
-const lexingResult = lexer(inputText)
+const inputText = "SELECT all FROM table"
 
-console.log(JSON.stringify(lexingResult, null, "\t"))
+//const lexingResult = lexer(inputText)
+//console.log(JSON.stringify(lexingResult, null, "\t"))
 
-parser.parse(inputText)
+//parser.parse(inputText)
+
+let ast = visitor.toAst(inputText)
+
+console.log(JSON.stringify(ast, null, "\t"))

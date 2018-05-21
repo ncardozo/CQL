@@ -48,7 +48,7 @@ module.exports = {
     const lexingResult = SelectLexer.tokenize(inputText)
 
     if(lexingResult.errors.length > 0) {
-      throw Error("Lexing errors detected")
+      throw Error("Lexing errors detected \n" + lexingResult.errors[0].message)
     }
 
     return lexingResult
