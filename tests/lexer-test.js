@@ -12,6 +12,13 @@ const contextActivation2 = "activate: name = Context1"
 const singleContext2Result = lexer(contextActivation2)
 console.log("--SINGLE KEYWORD ACTIVATION\n" + JSON.stringify(singleContextResult, null, "\t"))
 
+//Test single context activation
+//This activation is global for all object instances
+const contextDeactivation = "deactivate: Context1"
+const singleContextDeactResult = lexer(contextDeactivation)
+console.log("--SINGLE DEACTIVATION\n" + JSON.stringify(singleContextDeactResult, null, "\t"))
+
+
 //Activate all contexts satisfying a range
 const rangeActivation = "activate: date between(20170412, 20170425)"
 const rangeResult = lexer(rangeActivation)

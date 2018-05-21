@@ -6,7 +6,7 @@ const tokenVocabulary = {}
 
 const Activate = createToken({
   name: "Activate",
-  pattern: /activate:/
+  pattern: /activate:|deactivate:/
 })
 
 const For = createToken({
