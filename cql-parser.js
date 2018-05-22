@@ -1,10 +1,10 @@
 const Parser = require('chevrotain').Parser
-const CQLLexer = require("./cql-lexer")
+const cqlLexer = require("./cql-lexer")
 
 //Managing tokens defined in the lexer
-const tokenVocabulary = selectLexer.tokenVocabulary
+const tokenVocabulary = cqlLexer.tokenVocabulary
 
-const Activate = tokenVocabulary.activate
+const Activate = tokenVocabulary.Activate
 const For = tokenVocabulary.For
 const GreaterThan = tokenVocabulary.GreaterThan
 const LessThan = tokenVocabulary.LessThan
@@ -27,15 +27,16 @@ class CQLParser extends Parser {
 
     self.RULE("query", () => {
       self.CONSUME(Activate)
-      self.CONSUME(expressionStatement)
-      self.MANY_SEP({
-          SEP: self.connector,
-          DEF: () => {
-            self.SUBRULE(self.expressionStatement)
-          }
-      })
+      self.SUBRULE(self.filterStatement)
       self.OPTION(() => {
         self.SUBRULE(self.forStatement)
+      })
+    })
+
+    self.RULE("filterStatement", () => {
+      self.CONSUME(Identifier)
+      self.OPTION( () => {
+        self.SUBRULE(self.expressionStatement)
       })
     })
 
@@ -45,31 +46,45 @@ class CQLParser extends Parser {
     })
 
     self.RULE("expressionStatement", () => {
-      self.CONSUME(Identifier)
       self.OR([
-        {ALT: () => self.binaryExpression}
-        {ALT: () => self.predicateExpression}
+        {ALT: () => self.SUBRULE(self.binaryExpression) },
+        {ALT: () => self.SUBRULE(self.predicateExpression) }
       ])
     })
 
     self.RULE("binaryExpression", () => {
-      self.CONSUME(Identifier)
-      self.CONSUME(BinaryOperator)
+      self.SUBRULE(self.binaryOperator)
       self.CONSUME(Identifier)
     })
 
+    self.RULE("binaryOperator", () => {
+        self.OR([
+          {ALT: () => self.CONSUME(Equals)},
+          {ALT: () => self.CONSUME(LessThan)},
+          {ALT: () => self.CONSUME(GreaterThan)}
+        ])
+    })
+
     self.RULE("predicateExpression", () => {
-      self.CONSUME(PredicateOperator)
+      self.SUBRULE(self.predicateOperator)
       self.CONSUME(LParenthesis)
-      self.OR([
-        {ALT: () => self.CONSUME(Identifier)},
-        {ALT: () => self.CONSUME(Integer)}
-      ])
-      self.MANY_SEP({
+      self.AT_LEAST_ONE_SEP({
         SEP: Comma,
-        DEF: ()  => self.CONSUME(Integer)
+        DEF: () => self.OR([
+          {ALT: () => self.CONSUME(Identifier)},
+          {ALT: () => self.CONSUME(Integer)}
+        ])
       })
       self.CONSUME(RParenthesis)
+    })
+
+    self.RULE("predicateOperator", () => {
+        self.OR([
+          {ALT: () => self.CONSUME(Between)},
+          {ALT: () => self.CONSUME(AtLeastOne)},
+          {ALT: () => self.CONSUME(AtMostOne)},
+          {ALT: () => self.CONSUME(AllOf)}
+        ])
     })
 
     self.RULE("connector", () => {
@@ -78,5 +93,27 @@ class CQLParser extends Parser {
         {ALT: () => self.CONSUME(Or)}
       ])
     })
+
+    Parser.performSelfAnalysis(this)
+  }
+}
+
+const parserInstance = new CQLParser([])
+
+module.exports = {
+  parserInstance: parserInstance,
+  CQLParser: CQLParser,
+  parse: function(text) {
+    const lexingResult = cqlLexer.lexer(text)
+    //console.log("--SINGLE ACTIVATION\n" + JSON.stringify(lexingResult, null, "\t"))
+    //console.log(lexingResult.tokens)
+    parserInstance.input = lexingResult.tokens
+    parserInstance.query()
+
+    if(parserInstance.errors.length > 0) {
+      throw new Error("Parsing error detected\n" + parserInstance.errors[0].message)
+    } else {
+      console.log("--- 200 OK. Expression parsed correctly")
+    }
   }
 }
