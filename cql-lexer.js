@@ -8,10 +8,6 @@ const Activate = createToken({
   name: "Activate",  pattern: /activate:|deactivate:/
 })
 
-const Deactivate = createToken({
-  name: "Deactivate",  pattern: /deactivate:/
-})
-
 const For = createToken({
   name: "For",
   pattern: /for:/
@@ -26,7 +22,6 @@ const AtMost = createToken({name:"AtMostOne", pattern:/atMostOne/})
 const AllOf = createToken({name:"AllOf", pattern:/allOf/})
 const Equals = createToken({name:"Equals", pattern:/=/})
 const And = createToken({name: "And", pattern:/&/})
-const Or = createToken({name:"Or", pattern:/\|/})
 
 //special characters
 const Comma = createToken({name: "Comma", pattern: /,/})
@@ -48,7 +43,7 @@ const Integer = createToken({name: "Integer", pattern: /0|[1-9]\d*/})
 
 let allTokens = [
   WhiteSpace, Activate, For, GreaterThan, LessThan, Between,
-  AtLeast, AtMost, AllOf, Identifier, Equals, And, Or, Integer, Comma, LParenthesis,
+  AtLeast, AtMost, AllOf, Identifier, Equals, And, Integer, Comma, LParenthesis,
   RParenthesis
 ]
 
