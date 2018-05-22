@@ -27,8 +27,9 @@ class CQLParser extends Parser {
 
     self.RULE("query", () => {
       self.CONSUME(Activate)
-      self.AT_LEAST_ONE_SEP({
-          SEP: And,
+      self.CONSUME(expressionStatement)
+      self.MANY_SEP({
+          SEP: self.connector,
           DEF: () => {
             self.SUBRULE(self.expressionStatement)
           }
@@ -51,8 +52,14 @@ class CQLParser extends Parser {
       ])
     })
 
-    self.Rule("predicateExpression", () => {
-      self.CONSUME(predicateOperator)
+    self.RULE("binaryExpression", () => {
+      self.CONSUME(Identifier)
+      self.CONSUME(BinaryOperator)
+      self.CONSUME(Identifier)
+    })
+
+    self.RULE("predicateExpression", () => {
+      self.CONSUME(PredicateOperator)
       self.CONSUME(LParenthesis)
       self.OR([
         {ALT: () => self.CONSUME(Identifier)},
@@ -63,6 +70,13 @@ class CQLParser extends Parser {
         DEF: ()  => self.CONSUME(Integer)
       })
       self.CONSUME(RParenthesis)
+    })
+
+    self.RULE("connector", () => {
+      self.OR([
+        {ALT: () => self.CONSUME(And)},
+        {ALT: () => self.CONSUME(Or)}
+      ])
     })
   }
 }
