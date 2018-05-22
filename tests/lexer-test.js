@@ -10,7 +10,12 @@ console.log("--SINGLE ACTIVATION\n" + JSON.stringify(singleContextResult, null, 
 //Single activation with name
 const contextActivation2 = "activate: name = Context1"
 const singleContext2Result = lexer(contextActivation2)
-console.log("--SINGLE KEYWORD ACTIVATION\n" + JSON.stringify(singleContextResult, null, "\t"))
+console.log("--SINGLE KEYWORD ACTIVATION\n" + JSON.stringify(singleContext2Result, null, "\t"))
+
+//Single activation with two properties
+const contextActivation3 = "activate: name = Context1 & activationCount < 0"
+const singleContext3Result = lexer(contextActivation3)
+console.log("--MULTI-KEYWORD ACTIVATION\n" + JSON.stringify(singleContext3Result, null, "\t"))
 
 //Test single context activation
 //This activation is global for all object instances
