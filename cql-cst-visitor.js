@@ -13,23 +13,15 @@ class CQLtoAstVisitor extends BaseCQLVisitor {
   }
 
   query(ctx) {
-    let properties = this.visit(ctx.filterStatement)
+    let contextName = ctx.Identifier[0].image
+    let operator = this.visit(ctx.expressionStatement)
     let forStatement = this.visit(ctx.forStatement)
 
     return {
       type: "QUERY",
-      properties: properties,
+      contextName: contextName,
+      operator: operator,
       for: forStatement
-    }
-  }
-
-  filterStatement(ctx) {
-    let ctxName = ctx.Identifier[0].image
-    let expression = ctx.visit(ctx.expressionStatement)
-
-    return {
-      type: "FILTER_BEGIN",
-      expression: expression
     }
   }
 
@@ -105,11 +97,11 @@ const toAstVisitorInstance = new CQLtoAstVisitor()
 module.exports = {
   toAst: function(inputText) {
     const lexingResult = cqlLexer.lexer(inputText)
-    parserIntance.input = lexingResult.tokens
+    parserInstance.input = lexingResult.tokens
 
-    const cst = parserIntance.query()
+    const cst = parserInstance.query()
 
-    if(parserIntance.errors.length > 0) {
+    if(parserInstance.errors.length > 0) {
       throw Error("Error building the CST\n" + parserInstance.errors[0].message)
     }
 
