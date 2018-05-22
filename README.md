@@ -6,13 +6,13 @@ This project defines a parser for the Context Query Language (CQL). CQL offers a
 ### Rules
 The following summarize the semantics rules for the language
 ~~~~
-acivateStatement :: ("activate"|"deactivate")":" (Expression | Identifier) (Connector Expression)* (forStatement)?
+acivateStatement :: ("activate"|"deactivate")":"  (Expression (Connector Expression)*) (forStatement)?
 
 forStatement :: "for:" Identifier
 
-Expression :: (BinaryExpression | PredicateExpression)
+Expression ::  Identifier (BinaryExpression | PredicateExpression)?
 
-BinaryExpression :: Identifier RelationalOperator Identifier
+BinaryExpression :: RelationalOperator Identifier
 
 PredicateExpression :: Predicate"(" Identifier ("," Identifier)* ")"
 
