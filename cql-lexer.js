@@ -20,6 +20,7 @@ const LessThan = createToken({name:"LessThan", pattern:/</})
 const Between = createToken({name:"Between", pattern:/between/})
 const AtLeast = createToken({name:"AtLeastOne", pattern:/atLeastOne/})
 const AtMost = createToken({name:"AtMostOne", pattern:/atMostOne/})
+const AllOf = createToken({name:"AllOf", pattern:/allOf/})
 const Equals = createToken({name:"Equals", pattern:/=/})
 const And = createToken({name: "And", pattern:/&/})
 const Or = createToken({name:"Or", pattern:/\|/})
@@ -44,7 +45,7 @@ const Integer = createToken({name: "Integer", pattern: /0|[1-9]\d*/})
 
 let allTokens = [
   WhiteSpace, Activate, For, GreaterThan, LessThan, Between,
-  AtLeast, AtMost, Identifier, Equals, And, Or, Integer, Comma, LParenthesis,
+  AtLeast, AtMost, AllOf, Identifier, Equals, And, Or, Integer, Comma, LParenthesis,
   RParenthesis
 ]
 
