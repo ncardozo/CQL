@@ -26,14 +26,9 @@ class CQLParser extends Parser {
 
     self.RULE("query", () => {
       self.CONSUME(Activate)
-      self.AT_LEAST_ONE_SEP({
-        SEP: And,
-      	DEF: () => {
-        	self.CONSUME(Identifier)
-      		self.OPTION( () => {
-        		self.SUBRULE(self.expressionStatement)
-      		})
-    	}
+      self.CONSUME(Identifier)
+      self.OPTION( () => {
+      	self.SUBRULE(self.expressionStatement)
       })
       self.OPTION2(() => {
         self.SUBRULE(self.forStatement)
