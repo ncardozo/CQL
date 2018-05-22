@@ -5,8 +5,11 @@ const createToken = chevrotain.createToken
 const tokenVocabulary = {}
 
 const Activate = createToken({
-  name: "Activate",
-  pattern: /activate:|deactivate:/
+  name: "Activate",  pattern: /activate:|deactivate:/
+})
+
+const Deactivate = createToken({
+  name: "Deactivate",  pattern: /deactivate:/
 })
 
 const For = createToken({
