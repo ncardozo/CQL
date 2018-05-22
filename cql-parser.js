@@ -13,7 +13,6 @@ const AtLeast = tokenVocabulary.AtLeastOne
 const AtMost = tokenVocabulary.AtMostOne
 const Equals = tokenVocabulary.Equals
 const And = tokenVocabulary.Landscape
-const Or = tokenVocabulary.Or
 const Comma = tokenVocabulary.Comma
 const LParenthesis = tokenVocabulary.LParenthesis
 const RParenthesis = tokenVocabulary.RParenthesis
@@ -27,16 +26,17 @@ class CQLParser extends Parser {
 
     self.RULE("query", () => {
       self.CONSUME(Activate)
-      self.SUBRULE(self.filterStatement)
-      self.OPTION(() => {
-        self.SUBRULE(self.forStatement)
+      self.AT_LEAST_ONE_SEP({
+        SEP: And,
+      	DEF: () => {
+        	self.CONSUME(Identifier)
+      		self.OPTION( () => {
+        		self.SUBRULE(self.expressionStatement)
+      		})
+    	}
       })
-    })
-
-    self.RULE("filterStatement", () => {
-      self.CONSUME(Identifier)
-      self.OPTION( () => {
-        self.SUBRULE(self.expressionStatement)
+      self.OPTION2(() => {
+        self.SUBRULE(self.forStatement)
       })
     })
 
@@ -57,14 +57,6 @@ class CQLParser extends Parser {
       self.CONSUME(Identifier)
     })
 
-    self.RULE("binaryOperator", () => {
-        self.OR([
-          {ALT: () => self.CONSUME(Equals)},
-          {ALT: () => self.CONSUME(LessThan)},
-          {ALT: () => self.CONSUME(GreaterThan)}
-        ])
-    })
-
     self.RULE("predicateExpression", () => {
       self.SUBRULE(self.predicateOperator)
       self.CONSUME(LParenthesis)
@@ -78,6 +70,14 @@ class CQLParser extends Parser {
       self.CONSUME(RParenthesis)
     })
 
+    self.RULE("binaryOperator", () => {
+        self.OR([
+          {ALT: () => self.CONSUME(Equals)},
+          {ALT: () => self.CONSUME(LessThan)},
+          {ALT: () => self.CONSUME(GreaterThan)}
+        ])
+    })
+
     self.RULE("predicateOperator", () => {
         self.OR([
           {ALT: () => self.CONSUME(Between)},
@@ -85,13 +85,6 @@ class CQLParser extends Parser {
           {ALT: () => self.CONSUME(AtMostOne)},
           {ALT: () => self.CONSUME(AllOf)}
         ])
-    })
-
-    self.RULE("connector", () => {
-      self.OR([
-        {ALT: () => self.CONSUME(And)},
-        {ALT: () => self.CONSUME(Or)}
-      ])
     })
 
     Parser.performSelfAnalysis(this)
