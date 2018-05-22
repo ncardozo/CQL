@@ -10,13 +10,21 @@ acivateStatement :: ("activate"|"deactivate")":" (Expression | Identifier) (Conn
 
 forStatement :: "for:" Identifier
 
-Expression :: Identifier RelationalOperator ( Identifier | "("Identifier "," Identifier")" )
+Expression :: (BinaryExpression | PredicateExpression)
+
+BinaryExpression :: Identifier RelationalOperator Identifier
+
+PredicateExpression :: Predicate"(" Identifier ("," Identifier)* ")"
 
 Identifier :: [a-zA-Z]*
 
-Connector :: "&" | "|"
+Integer :: [0-9]*
 
-RelationalOperator :: "between" | "=" | "<" | ">" | "atLeastOne" | "atMostOne"
+Predicate :: "between" | "atLeastOne" | "atMostOne" | "allOf"
+
+RelationalOperator :: "=" | "<" | ">"
+
+Connector :: "&" | "|"  
 ~~~~
 
 
