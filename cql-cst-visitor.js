@@ -56,7 +56,7 @@ class CQLtoAstVisitor extends BaseCQLVisitor {
 
   predicateExpression(ctx) {
     let predicate = this.visit(ctx.predicateOperator)
-    let conditions = ctx.Identifier[0].image//.map(identToken => identToken.image)
+    let conditions = this.visit(ctx.atomicExpression)//.map(identToken => identToken.image)
 
     return {
       type: "PREDICATE_EXPRESSION",
