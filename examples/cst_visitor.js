@@ -27,7 +27,10 @@ class SQLtoAstVisitor extends BaseSQLVisitor {
     selectClause(ctx) {
       const columns = ctx.Identifier.map(identToken => identToken.image)
 
-      return { type: "SELECT_CLAUSE", columns: columns}
+      return {
+        type: "SELECT_CLAUSE",
+        columns: columns
+      }
     }
 
     fromClause(ctx) {
@@ -76,7 +79,7 @@ module.exports = {
   toAst: function(inputText) {
     const lexingResult = selectLexer.lexer(inputText)
     parserInstance.input = lexingResult.tokens
-    
+
     const cst = parserInstance.selectStatement()
     console.log(JSON.stringify(parserInstance.errors, null, 2))
     if(parserInstance.errors.length > 0) {

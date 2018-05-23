@@ -33,8 +33,8 @@ class CQLtoAstVisitor extends BaseCQLVisitor {
   }
 
   expressionStatement(ctx) {
-      let binExp = ctx.visit(ctx.binaryExpression)
-      let predExp = ctx.visit(ctx.predicateExpression)
+      let binExp = this.visit(ctx.binaryExpression)
+      let predExp = this.visit(ctx.predicateExpression)
 
       return {
         type: "EXPRESSION",
@@ -44,7 +44,7 @@ class CQLtoAstVisitor extends BaseCQLVisitor {
   }
 
   binaryExpression(ctx) {
-    let op = ctx.visit(ctx.binaryOperator)
+    let op = this.visit(ctx.binaryOperator)
     let value = ctx.Identifier[0].image
 
     return {
@@ -55,8 +55,8 @@ class CQLtoAstVisitor extends BaseCQLVisitor {
   }
 
   predicateExpression(ctx) {
-    let predicate = ctx.visit(ctx.predicateOperator)
-    let conditions = ctx.Identifier.map(identToken => identToken.image)
+    let predicate = this.visit(ctx.predicateOperator)
+    let conditions = ctx.Identifier[0].image//.map(identToken => identToken.image)
 
     return {
       type: "PREDICATE_EXPRESSION",
