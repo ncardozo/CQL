@@ -16,12 +16,14 @@ class CQLtoAstVisitor extends BaseCQLVisitor {
     let contextName = ctx.Identifier[0].image
     let operator = this.visit(ctx.expressionStatement)
     let forStatement = this.visit(ctx.forStatement)
+    let scopeStatement = ctx.CurrentScope[0].image
 
     return {
       type: "QUERY",
       contextName: contextName,
       operator: operator,
-      for: forStatement
+      for: forStatement,
+      scope: scopeStatement
     }
   }
 

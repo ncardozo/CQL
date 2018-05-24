@@ -14,6 +14,7 @@ const For = createToken({
 })
 
 //relational operators to filter out contexts
+const CurrentScope = createToken({name: "CurrentScope", pattern:/withCurrentScope/})
 const GreaterThan = createToken({name: "GreaterThan", pattern:/>/})
 const LessThan = createToken({name:"LessThan", pattern:/</})
 const Between = createToken({name:"Between", pattern:/between/})
@@ -42,7 +43,7 @@ const Identifier = createToken({
 const Integer = createToken({name: "Integer", pattern: /0|[1-9]\d*/})
 
 let allTokens = [
-  WhiteSpace, Activate, For, GreaterThan, LessThan, Between,
+  WhiteSpace, Activate, For, GreaterThan, LessThan, Between, CurrentScope
   AtLeast, AtMost, AllOf, Identifier, Equals, And, Integer, Comma, LParenthesis,
   RParenthesis
 ]

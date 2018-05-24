@@ -33,6 +33,9 @@ class CQLParser extends Parser {
       self.OPTION2(() => {
         self.SUBRULE(self.forStatement)
       })
+      self.OPTION3( () => {
+        self.CONSUME(CurrentScope)
+      })
     })
 
     self.RULE("forStatement", () => {
