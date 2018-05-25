@@ -43,7 +43,7 @@ const Identifier = createToken({
 const Integer = createToken({name: "Integer", pattern: /0|[1-9]\d*/})
 
 let allTokens = [
-  WhiteSpace, Activate, For, GreaterThan, LessThan, Between, CurrentScope
+  WhiteSpace, Activate, For, GreaterThan, LessThan, Between, CurrentScope,
   AtLeast, AtMost, AllOf, Identifier, Equals, And, Integer, Comma, LParenthesis,
   RParenthesis
 ]
