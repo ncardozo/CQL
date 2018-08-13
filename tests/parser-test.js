@@ -10,9 +10,9 @@ cqlParser.parse(contextActivation)
 const contextActivation2 = "activate: name = Context1"
 cqlParser.parse(contextActivation2)
 
-//Single activation with two properties
-//const contextActivation3 = "activate: name = Context1 & activationCount < 1"
-//cqlParser.parse(contextActivation3)
+//Multiple context activation with two properties
+const contextActivation3 = "activate: name = Context1 & activationCount < 1"
+cqlParser.parse(contextActivation3)
 
 //Test single context activation
 //This activation is global for all object instances
