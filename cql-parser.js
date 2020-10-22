@@ -1,8 +1,9 @@
-const Parser = require('chevrotain').Parser
+const Parser = require('chevrotain').CstParser
 const cqlLexer = require("./cql-lexer")
 
 //Managing tokens defined in the lexer
 const tokenVocabulary = cqlLexer.tokenVocabulary
+const allTokens = cqlLexer.allTokens
 
 const Activate = tokenVocabulary.Activate
 const For = tokenVocabulary.For
@@ -11,8 +12,9 @@ const LessThan = tokenVocabulary.LessThan
 const Between = tokenVocabulary.Between
 const AtLeast = tokenVocabulary.AtLeastOne
 const AtMost = tokenVocabulary.AtMostOne
+const AllOf = tokenVocabulary.AllOf
 const Equals = tokenVocabulary.Equals
-const And = tokenVocabulary.Landscape
+const And = tokenVocabulary.And
 const Comma = tokenVocabulary.Comma
 const LParenthesis = tokenVocabulary.LParenthesis
 const RParenthesis = tokenVocabulary.RParenthesis
@@ -21,7 +23,7 @@ const Integer = tokenVocabulary.Integer
 
 class CQLParser extends Parser {
   constructor(input, config) {
-    super(input, tokenVocabulary, config)
+    super(allTokens)
     const self = this
 
     self.RULE("query", () => {
@@ -76,20 +78,17 @@ class CQLParser extends Parser {
     self.RULE("predicateOperator", () => {
         self.OR([
           {ALT: () => self.CONSUME(Between)},
-          {ALT: () => self.CONSUME(AtLeastOne)},
-          {ALT: () => self.CONSUME(AtMostOne)},
+          {ALT: () => self.CONSUME(AtLeast)},
+          {ALT: () => self.CONSUME(AtMost)},
           {ALT: () => self.CONSUME(AllOf)}
         ])
     })
 
-    Parser.performSelfAnalysis(this)
+    this.performSelfAnalysis(this)
   }
 }
 
-const parserInstance = new CQLParser([])
-
 module.exports = {
-  parserInstance: parserInstance,
   CQLParser: CQLParser,
   parse: function(text) {
     const lexingResult = cqlLexer.lexer(text)

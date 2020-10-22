@@ -1,17 +1,12 @@
 const chevrotain = require("chevrotain")
+const Lexer = chevrotain.Lexer
 
 const createToken = chevrotain.createToken
 
 const tokenVocabulary = {}
 
-const Activate = createToken({
-  name: "Activate",  pattern: /activate:|deactivate:/
-})
-
-const For = createToken({
-  name: "For",
-  pattern: /for:/
-})
+const Activate = createToken({name: "Activate",  pattern: /activate:|deactivate:/})
+const For = createToken({name: "For", pattern: /for:/})
 
 //relational operators to filter out contexts
 const GreaterThan = createToken({name: "GreaterThan", pattern:/>/})
@@ -21,7 +16,7 @@ const AtLeast = createToken({name:"AtLeastOne", pattern:/atLeastOne/})
 const AtMost = createToken({name:"AtMostOne", pattern:/atMostOne/})
 const AllOf = createToken({name:"AllOf", pattern:/allOf/})
 const Equals = createToken({name:"Equals", pattern:/=/})
-const And = createToken({name: "And", pattern:/&/})
+const And = createToken({name: "And", pattern:/and/})
 
 //special characters
 const Comma = createToken({name: "Comma", pattern: /,/})
@@ -41,13 +36,12 @@ const Identifier = createToken({
 })
 const Integer = createToken({name: "Integer", pattern: /0|[1-9]\d*/})
 
-let allTokens = [
-  WhiteSpace, Activate, For, GreaterThan, LessThan, Between,
-  AtLeast, AtMost, AllOf, Identifier, Equals, And, Integer, Comma, LParenthesis,
-  RParenthesis
-]
+let allTokens = [WhiteSpace, 
+  Activate, For, GreaterThan, LessThan, Between,
+  AtLeast, AtMost, AllOf, Equals, And, Identifier, Integer, Comma, LParenthesis,
+  RParenthesis]
 
-const CQLLexer = new chevrotain.Lexer(allTokens)
+const CQLLexer = new Lexer(allTokens)
 
 allTokens.forEach(tokenType => {
   tokenVocabulary[tokenType.name] = tokenType
@@ -55,6 +49,7 @@ allTokens.forEach(tokenType => {
 
 module.exports = {
   tokenVocabulary: tokenVocabulary,
+  allTokens: allTokens,
   lexer: function(inputQuery) {
     const lexingResult = CQLLexer.tokenize(inputQuery)
 

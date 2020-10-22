@@ -1,7 +1,7 @@
 const visitor = require("../cql-cst-visitor")
 
 
-let ast
+var ast
 
 //Test single context activation
 //This activation is global for all object instances

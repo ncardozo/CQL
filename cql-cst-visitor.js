@@ -2,11 +2,10 @@ const cqlLexer = require("./cql-lexer")
 const Parser = require("./cql-parser")
 
 
-const CQLParser = Parser.CQLParser
-const parserInstance = new CQLParser([], {outputCst: true})
+const parserInstance = new Parser.CQLParser([])
 const BaseCQLVisitor = parserInstance.getBaseCstVisitorConstructor()
 
-class CQLtoAstVisitor extends BaseCQLVisitor {
+class CQLInterpreter extends BaseCQLVisitor {
   constructor() {
     super()
     this.validateVisitor()
@@ -56,7 +55,8 @@ class CQLtoAstVisitor extends BaseCQLVisitor {
 
   predicateExpression(ctx) {
     let predicate = this.visit(ctx.predicateOperator)
-    let conditions = ctx.Identifier[0].image//.map(identToken => identToken.image)
+    console.log(ctx)
+    let conditions = ctx.Integer.map(intToken => intToken.image)
 
     return {
       type: "PREDICATE_EXPRESSION",
@@ -92,7 +92,7 @@ class CQLtoAstVisitor extends BaseCQLVisitor {
   }
 }
 
-const toAstVisitorInstance = new CQLtoAstVisitor()
+const cqlInterpreter = new CQLInterpreter()
 
 module.exports = {
   toAst: function(inputText) {
@@ -105,7 +105,7 @@ module.exports = {
       throw Error("Error building the CST\n" + parserInstance.errors[0].message)
     }
 
-    const ast = toAstVisitorInstance.visit(cst)
+    const ast = cqlInterpreter.visit(cst)
     return ast
   }
 }
