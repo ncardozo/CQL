@@ -17,6 +17,11 @@ const contextActivation3 = "activate: name = Context1 & activationCount < 0"
 const singleContext3Result = lexer(contextActivation3)
 console.log("--MULTI-KEYWORD ACTIVATION\n" + JSON.stringify(singleContext3Result, null, "\t"))
 
+//Multiple context activation with two
+const contextActivation4 = "activate: name = Context1 & name = Context2"
+const multipleContextResult = lexer(contextActivation4)
+console.log("--MULTI-CONTEXT ACTIVATION\n" + JSON.stringify(multipleContextResult, null, "\t"))
+
 //Test single context activation
 //This activation is global for all object instances
 const contextDeactivation = "deactivate: Context1"

@@ -28,12 +28,15 @@ class CQLParser extends Parser {
 
     self.RULE("query", () => {
       self.CONSUME(Activate)
-      self.CONSUME(Identifier)
+      self.CONSUME2(Identifier)
       self.OPTION( () => {
       	self.SUBRULE(self.expressionStatement)
       })
       self.OPTION2(() => {
-        self.SUBRULE(self.forStatement)
+        self.SUBRULE2(self.forStatement)
+      })
+      self.OPTION3( () => {
+        self.CONSUME3(CurrentScope)
       })
     })
 
