@@ -1,0 +1,20 @@
+{
+  "name": "cql",
+  "private": false,
+  "version": "0.1.0",
+  "description": "Query langauge interpreter for COP",
+  "keywords": [],
+  "dependencies": {
+    "context-traits": "0.0.2",
+    "traits.js": "~1.1.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ncardozo/CQL"
+  },
+  "scripts": {
+          "test": "jest"
+  },
+  "author": "NicolasCardozo",
+  "license": ""
+}
