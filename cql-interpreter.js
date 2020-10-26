@@ -12,16 +12,19 @@ class CQLInterpreter extends BaseCQLVisitor {
   }
 
   query(ctx) {
+    let str = ctx.Activate[0].image
+    let operation = str.substring(0, str.length-1)
     let contextName = ctx.Identifier[0].image
     let operator = this.visit(ctx.expressionStatement)
     let forStatement = this.visit(ctx.forStatement)
 
-    return {
+    return `${contextName}.${operation}()`
+    /*return {
       type: "QUERY",
       contextName: contextName,
       operator: operator,
       for: forStatement
-    }
+    }*/
   }
 
   forStatement(ctx) {
@@ -55,7 +58,6 @@ class CQLInterpreter extends BaseCQLVisitor {
 
   predicateExpression(ctx) {
     let predicate = this.visit(ctx.predicateOperator)
-    console.log(ctx)
     let conditions = ctx.Integer.map(intToken => intToken.image)
 
     return {
@@ -95,7 +97,7 @@ class CQLInterpreter extends BaseCQLVisitor {
 const cqlInterpreter = new CQLInterpreter()
 
 module.exports = {
-  toAst: function(inputText) {
+  visit: function(inputText) {
     const lexingResult = cqlLexer.lexer(inputText)
     parserInstance.input = lexingResult.tokens
 
