@@ -20,11 +20,11 @@ Identifier :: [a-zA-Z]*
 
 Integer :: [0-9]*
 
-Predicate :: "between" | "atLeastOne" | "atMostOne" | "allOf"
+Predicate :: "between" | "atLeastOne" | "atMostOne" | "allOf" | "unique"
 
 RelationalOperator :: "=" | "<" | ">"
 
-Connector :: "&" | "|"  
+Connector :: "and" | "or"  
 ~~~~
 
 
@@ -40,3 +40,7 @@ Activates all contexts created in a date between the given dates.
 ` activate: name = "ctx1" for: obj`
 - Activation of a context for all instances of a class `clss`
 ` activate: name = "ctx1" for: clss`
+
+
+### Tests
+All tests are executing using jest, by means of `npm test`
