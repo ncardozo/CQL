@@ -43,4 +43,4 @@ Activates all contexts created in a date between the given dates.
 
 
 ### Tests
-All tests are executing using jest, by means of `npm test`
+All tests are executing using [jest](https://jestjs.io), by means of `npm test`
