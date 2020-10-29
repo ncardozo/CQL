@@ -1,9 +1,9 @@
-# Context Query Language (CQL) Semantics #
+# Context Query Language (CQL) 
 
 This project defines a parser for the Context Query Language (CQL). CQL offers a declarative language for __context activation__ to context-oriented languages
 
 
-### Rules
+### Syntactic Rules
 The following summarize the semantics rules for the language
 ~~~~
 acivateStatement :: ("activate"|"deactivate")":"  (Expression (Connector Expression)*) (forStatement)?
