@@ -18,9 +18,10 @@ const LessThan = createToken({name:"LessThan", pattern:/</})
 const Between = createToken({name:"Between", pattern:/between/})
 const AtLeast = createToken({name:"AtLeastOne", pattern:/atLeastOne/})
 const AtMost = createToken({name:"AtMostOne", pattern:/atMostOne/})
+const Unique = createToken({name:"Unique", pattern:/unique/})
 const AllOf = createToken({name:"AllOf", pattern:/allOf/})
 const Equals = createToken({name:"Equals", pattern:/=/})
-const And = createToken({name: "And", pattern:/&/})
+const And = createToken({name: "And", pattern:/and/})
 
 //special characters
 const Comma = createToken({name: "Comma", pattern: /,/})
@@ -37,11 +38,10 @@ const WhiteSpace = createToken({
 const Identifier = createToken({name: "Identifier",  pattern: /[a-zA-Z]\w*/,})
 const Integer = createToken({name: "Integer", pattern: /0|[1-9]\d*/})
 
-let allTokens = [
-  WhiteSpace, 
+let allTokens = [WhiteSpace, 
   Activate, For, GreaterThan, LessThan, Between,
-  AtLeast, AtMost, AllOf, Equals, And, Identifier, Integer, Comma, LParenthesis,
-  RParenthesis];
+  AtLeast, AtMost, AllOf, Unique, Equals, And, Identifier, Integer, Comma, LParenthesis,
+  RParenthesis]
   
   const CQLLexer = new Lexer(allTokens);
   
@@ -84,32 +84,40 @@ let allTokens = [
 
     self.RULE("predicateExpression", () => {
       self.SUBRULE(self.predicateOperator)
+      self.OPTION(() =>
+	      self.SUBRULE(self.predicateParameters)
+      )
+    })
+
+    self.RULE("predicateParameters", () => {
       self.CONSUME(LParenthesis)
       self.AT_LEAST_ONE_SEP({
-        SEP: Comma,
-        DEF: () => self.OR([
+       	SEP: Comma,
+	    DEF: () => self.OR([
           {ALT: () => self.CONSUME(Identifier)},
-          {ALT: () => self.CONSUME(Integer)}
-        ])
+       	  {ALT: () => self.CONSUME(Integer)}
+       	])
       })
       self.CONSUME(RParenthesis)
     })
 
     self.RULE("binaryOperator", () => {
-        self.OR([
-          {ALT: () => self.CONSUME(Equals)},
-          {ALT: () => self.CONSUME(LessThan)},
-          {ALT: () => self.CONSUME(GreaterThan)}
-        ])
+      self.OR([
+        {ALT: () => self.CONSUME(Equals)},
+        {ALT: () => self.CONSUME(LessThan)},
+        {ALT: () => self.CONSUME(GreaterThan)},
+        {ALT: () => self.CONSUME(And)}
+      ])
     })
 
     self.RULE("predicateOperator", () => {
-        self.OR([
-          {ALT: () => self.CONSUME(Between)},
-          {ALT: () => self.CONSUME(AtLeast)},
-          {ALT: () => self.CONSUME(AtMost)},
-          {ALT: () => self.CONSUME(AllOf)}
-        ])
+      self.OR([
+        {ALT: () => self.CONSUME(Between)},
+        {ALT: () => self.CONSUME(AtLeast)},
+        {ALT: () => self.CONSUME(AtMost)},
+        {ALT: () => self.CONSUME(AllOf)},
+        {ALT: () => self.CONSUME(Unique)}
+      ])
     })
 
     this.performSelfAnalysis(this)
@@ -176,12 +184,19 @@ class CQLInterpreter extends BaseCstVisitor {
 
   predicateExpression(ctx) {
     let predicate = this.visit(ctx.predicateOperator)
-    console.log(ctx)
-    let conditions = ctx.Integer.map(intToken => intToken.image)
-
+    let params = this.visit(ctx.predicateParameters)
+    
     return {
       type: "PREDICATE_EXPRESSION",
-      conditions: conditions
+      predicate: predicate,
+      conditions: params
+    }
+  }
+
+  predicateParameters(ctx) {
+    let conditions = ctx.Integer.map(intToken => intToken.image)
+	  return {
+      parameters: conditions
     }
   }
 
@@ -199,8 +214,10 @@ class CQLInterpreter extends BaseCstVisitor {
         return ctx.AtLeastOne[0].image
       else if(ctx.AtMostOne)
         return ctx.AtMostOne[0].image
+      else if(ctx.Unique)
+        return ctx.Unique[0].image
       else
-        ctx.AllOf[0].image
+        return ctx.AllOf[0].image
   }
 
   binaryOperator(ctx) {
@@ -208,8 +225,10 @@ class CQLInterpreter extends BaseCstVisitor {
       return ctx.Equals[0].image
     else if(ctx.GreaterThan)
       return ctx.GreaterThan[0].image
-    else
+    else if(ctx.LessThan)
       return cxt.LessThan[0].image
+    else
+      return ctx.And[0].image
   }
 }
 
