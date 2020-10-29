@@ -16,6 +16,7 @@ const AllOf = tokenVocabulary.AllOf
 const Unique = tokenVocabulary.Unique
 const Equals = tokenVocabulary.Equals
 const And = tokenVocabulary.And
+const Or = tokenVocabulary.Or
 const Comma = tokenVocabulary.Comma
 const LParenthesis = tokenVocabulary.LParenthesis
 const RParenthesis = tokenVocabulary.RParenthesis
@@ -47,10 +48,13 @@ class CQLParser extends Parser {
     })
 
     self.RULE("expressionStatement", () => {
-      self.OR([
-        {ALT: () => self.SUBRULE(self.binaryExpression) },
-        {ALT: () => self.SUBRULE(self.predicateExpression) }
-      ])
+      self.AT_LEAST_ONE_SEP({
+        SEP: Or,
+        DEF: () => self.OR([
+         {ALT: () => self.SUBRULE(self.binaryExpression) },
+         {ALT: () => self.SUBRULE(self.predicateExpression) }
+       ])
+     })
     })
 
     self.RULE("binaryExpression", () => {
@@ -81,9 +85,15 @@ class CQLParser extends Parser {
         self.OR([
           {ALT: () => self.CONSUME(Equals)},
           {ALT: () => self.CONSUME(LessThan)},
-          {ALT: () => self.CONSUME(GreaterThan)},
-          {ALT: () => self.CONSUME(And)}
+          {ALT: () => self.CONSUME(GreaterThan)}
         ])
+    })
+    
+    self.RULE("connector", () => {
+      self.OR([
+        {ALT: () => self.CONSUME(And)},
+        {ALT: () => self.CONSUME(Or)}
+      ])
     })
 
     self.RULE("predicateOperator", () => {
