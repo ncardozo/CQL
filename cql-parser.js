@@ -13,6 +13,7 @@ const Between = tokenVocabulary.Between
 const AtLeast = tokenVocabulary.AtLeastOne
 const AtMost = tokenVocabulary.AtMostOne
 const AllOf = tokenVocabulary.AllOf
+const Unique = tokenVocabulary.Unique
 const Equals = tokenVocabulary.Equals
 const And = tokenVocabulary.And
 const Comma = tokenVocabulary.Comma
@@ -35,9 +36,9 @@ class CQLParser extends Parser {
       self.OPTION2(() => {
         self.SUBRULE2(self.forStatement)
       })
-      self.OPTION3( () => {
-        self.CONSUME3(CurrentScope)
-      })
+      //self.OPTION3( () => {
+       // self.CONSUME3(CurrentScope)
+     // })
     })
 
     self.RULE("forStatement", () => {
@@ -59,13 +60,19 @@ class CQLParser extends Parser {
 
     self.RULE("predicateExpression", () => {
       self.SUBRULE(self.predicateOperator)
+      self.OPTION(() =>
+	      self.SUBRULE(self.predicateParameters)
+      )
+    })
+
+    self.RULE("predicateParameters", () => {
       self.CONSUME(LParenthesis)
       self.AT_LEAST_ONE_SEP({
-        SEP: Comma,
-        DEF: () => self.OR([
+       	SEP: Comma,
+	    DEF: () => self.OR([
           {ALT: () => self.CONSUME(Identifier)},
-          {ALT: () => self.CONSUME(Integer)}
-        ])
+       	  {ALT: () => self.CONSUME(Integer)}
+       	])
       })
       self.CONSUME(RParenthesis)
     })
@@ -74,7 +81,8 @@ class CQLParser extends Parser {
         self.OR([
           {ALT: () => self.CONSUME(Equals)},
           {ALT: () => self.CONSUME(LessThan)},
-          {ALT: () => self.CONSUME(GreaterThan)}
+          {ALT: () => self.CONSUME(GreaterThan)},
+          {ALT: () => self.CONSUME(And)}
         ])
     })
 
@@ -83,7 +91,8 @@ class CQLParser extends Parser {
           {ALT: () => self.CONSUME(Between)},
           {ALT: () => self.CONSUME(AtLeast)},
           {ALT: () => self.CONSUME(AtMost)},
-          {ALT: () => self.CONSUME(AllOf)}
+          {ALT: () => self.CONSUME(AllOf)},
+          {ALT: () => self.CONSUME(Unique)}
         ])
     })
 
