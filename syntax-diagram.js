@@ -1,4 +1,3 @@
-//https://sap.github.io/chevrotain/playground/
 (function calculatorExampleCst() {
   "use strict";
   
@@ -22,6 +21,8 @@ const Unique = createToken({name:"Unique", pattern:/unique/})
 const AllOf = createToken({name:"AllOf", pattern:/allOf/})
 const Equals = createToken({name:"Equals", pattern:/=/})
 const And = createToken({name: "And", pattern:/and/})
+const Or = createToken({name: "Or", pattern:/or/})
+const In = createToken({name: "In", pattern:/in/})
 
 //special characters
 const Comma = createToken({name: "Comma", pattern: /,/})
@@ -40,7 +41,7 @@ const Integer = createToken({name: "Integer", pattern: /0|[1-9]\d*/})
 
 let allTokens = [WhiteSpace, 
   Activate, For, GreaterThan, LessThan, Between,
-  AtLeast, AtMost, AllOf, Unique, Equals, And, Identifier, Integer, Comma, LParenthesis,
+  AtLeast, AtMost, AllOf, Unique, Equals, And, Or, In, Identifier, Integer, Comma, LParenthesis,
   RParenthesis]
   
   const CQLLexer = new Lexer(allTokens);
@@ -71,22 +72,28 @@ let allTokens = [WhiteSpace,
     })
 
     self.RULE("expressionStatement", () => {
-      self.OR([
-        {ALT: () => self.SUBRULE(self.binaryExpression) },
-        {ALT: () => self.SUBRULE(self.predicateExpression) }
-      ])
+      self.AT_LEAST_ONE_SEP({
+       	SEP: Or,
+	    DEF: () => self.OR([
+        	{ALT: () => self.SUBRULE(self.binaryExpression) },
+        	{ALT: () => self.SUBRULE(self.predicateExpression) }
+      	])
+      })
     })
 
     self.RULE("binaryExpression", () => {
       self.SUBRULE(self.binaryOperator)
-      self.CONSUME(Identifier)
+      self.OR([
+        	{ALT: () => self.CONSUME(Identifier) },
+        	{ALT: () => self.SUBRULE(self.predicateExpression) }
+      	])
     })
 
     self.RULE("predicateExpression", () => {
-      self.SUBRULE(self.predicateOperator)
-      self.OPTION(() =>
+        self.SUBRULE(self.predicateOperator)
+      	self.OPTION(() =>
 	      self.SUBRULE(self.predicateParameters)
-      )
+      	)
     })
 
     self.RULE("predicateParameters", () => {
@@ -106,10 +113,17 @@ let allTokens = [WhiteSpace,
         {ALT: () => self.CONSUME(Equals)},
         {ALT: () => self.CONSUME(LessThan)},
         {ALT: () => self.CONSUME(GreaterThan)},
-        {ALT: () => self.CONSUME(And)}
+        {ALT: () => self.CONSUME(In)}
       ])
     })
 
+    self.RULE("connector", () => {
+      self.OR([
+        {ALT: () => self.CONSUME(And)},
+        {ALT: () => self.CONSUME(Or)}
+      ])
+    })
+    
     self.RULE("predicateOperator", () => {
       self.OR([
         {ALT: () => self.CONSUME(Between)},
@@ -141,14 +155,18 @@ class CQLInterpreter extends BaseCstVisitor {
   }
 
   query(ctx) {
+    let str = ctx.Activate[0].image
+    let operation = str.substring(0, str.length-1)
     let contextName = ctx.Identifier[0].image
-    let operator = this.visit(ctx.expressionStatement)
+    let predicate = this.visit(ctx.expressionStatement)
     let forStatement = this.visit(ctx.forStatement)
 
     return {
       type: "QUERY",
+      request: str,
       contextName: contextName,
-      operator: operator,
+      operator: operation,
+      predicates: predicate,
       for: forStatement
     }
   }
@@ -162,12 +180,12 @@ class CQLInterpreter extends BaseCstVisitor {
 
   expressionStatement(ctx) {
       let binExp = this.visit(ctx.binaryExpression)
-      let predExp = this.visit(ctx.predicateExpression)
-
+      //let predExp = this.visit(ctx.predicateExpression)
+      let expressions = ctx.predicateExpression.map(stmt => this.visit(ctx.predicateExpression))
       return {
         type: "EXPRESSION",
         binaryExpression: binExp,
-        predicateExpression: predExp
+        predicateExpression: expressions
       }
   }
 
@@ -225,8 +243,15 @@ class CQLInterpreter extends BaseCstVisitor {
       return ctx.Equals[0].image
     else if(ctx.GreaterThan)
       return ctx.GreaterThan[0].image
-    else if(ctx.LessThan)
-      return cxt.LessThan[0].image
+    else if(ctx.In)
+      return ctx.In[0].image
+    else 
+      return ctx.LessThan[0].image
+  }
+  
+  connector(ctx) {
+  	if(ctx.Or)
+      return ctx.Or[0].image
     else
       return ctx.And[0].image
   }
@@ -246,3 +271,5 @@ const toAstVisitorInstance = new CQLInterpreter()
 
 //INPUT:
 //activate: name = Curtains
+
+
