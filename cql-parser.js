@@ -69,13 +69,6 @@ class CQLParser extends Parser {
     })
 
     self.RULE("predicateExpression", () => {
-      self.SUBRULE(self.predicateOperator)
-      self.OPTION(() =>
-	      self.SUBRULE(self.predicateParameters)
-      )
-    })
-
-    self.RULE("predicateExpression", () => {
       self.AT_LEAST_ONE_SEP({
         SEP: Comma,
         DEF: () => self.OR([
@@ -128,7 +121,7 @@ class CQLParser extends Parser {
         {ALT: () => self.CONSUME(Or)}
       ])
     })
-    
+
     this.performSelfAnalysis(this)
   }
 }
