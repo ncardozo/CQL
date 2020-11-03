@@ -19,6 +19,7 @@ const AllOf = createToken({name:"AllOf", pattern:/allOf/})
 const Equals = createToken({name:"Equals", pattern:/=/})
 const And = createToken({name: "And", pattern:/and/})
 const Or = createToken({name: "Or", pattern:/or/})
+const In = createToken({name: "In", pattern:/in/})
 
 //special characters
 const Comma = createToken({name: "Comma", pattern: /,/})
@@ -40,7 +41,7 @@ const Integer = createToken({name: "Integer", pattern: /0|[1-9]\d*/})
 
 let allTokens = [WhiteSpace, 
   Activate, For, GreaterThan, LessThan, Between,
-  AtLeast, AtMost, AllOf, Unique, Equals, And, Or, Identifier, Integer, Comma, LParenthesis,
+  AtLeast, AtMost, AllOf, Unique, Equals, And, Or, In, Identifier, Integer, Comma, LParenthesis,
   RParenthesis]
 
 const CQLLexer = new Lexer(allTokens)

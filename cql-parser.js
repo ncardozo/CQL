@@ -17,6 +17,7 @@ const Unique = tokenVocabulary.Unique
 const Equals = tokenVocabulary.Equals
 const And = tokenVocabulary.And
 const Or = tokenVocabulary.Or
+const In = tokenVocabulary.In
 const Comma = tokenVocabulary.Comma
 const LParenthesis = tokenVocabulary.LParenthesis
 const RParenthesis = tokenVocabulary.RParenthesis
@@ -48,18 +49,23 @@ class CQLParser extends Parser {
     })
 
     self.RULE("expressionStatement", () => {
-      self.AT_LEAST_ONE_SEP({
-        SEP: Or,
-        DEF: () => self.OR([
-         {ALT: () => self.SUBRULE(self.binaryExpression) },
-         {ALT: () => self.SUBRULE(self.predicateExpression) }
-       ])
-     })
+      self.OPTION1(() => { self.CONSUME(LParenthesis) })
+      self.OR([
+        {ALT: () => self.SUBRULE(self.binaryExpression)},
+        {ALT: () => self.SUBRULE(self.predicateExpression)}
+        ])
+      self.OPTION2(() => { self.CONSUME(RParenthesis) })
     })
 
     self.RULE("binaryExpression", () => {
-      self.SUBRULE(self.binaryOperator)
-      self.CONSUME(Identifier)
+      self.AT_LEAST_ONE_SEP({
+        SEP: Or,
+		    DEF: () => { 
+              self.CONSUME(Identifier)
+			        self.SUBRULE(self.binaryOperator)
+	        
+         }
+      }) 
     })
 
     self.RULE("predicateExpression", () => {
@@ -67,6 +73,32 @@ class CQLParser extends Parser {
       self.OPTION(() =>
 	      self.SUBRULE(self.predicateParameters)
       )
+    })
+
+    self.RULE("predicateExpression", () => {
+      self.AT_LEAST_ONE_SEP({
+        SEP: Comma,
+        DEF: () => self.OR([
+              {ALT:() => self.SUBRULE(self.uniPredicate) },
+              {ALT:() => self.SUBRULE(self.paramPredicate) }
+          ]) 
+      })
+    })
+
+    self.RULE("paramPredicate", () => {
+      self.OR([
+          {ALT: () => self.CONSUME(Between)},
+          {ALT: () => self.CONSUME(AtLeast)},
+          {ALT: () => self.CONSUME(AtMost)}
+        ])
+      self.SUBRULE(self.predicateParameters) 
+    })
+              
+    self.RULE("uniPredicate", () => {
+      self.OR([
+        {ALT: () => self.CONSUME(AllOf)},
+        {ALT: () => self.CONSUME(Unique)}
+      ])
     })
 
     self.RULE("predicateParameters", () => {
@@ -85,7 +117,8 @@ class CQLParser extends Parser {
         self.OR([
           {ALT: () => self.CONSUME(Equals)},
           {ALT: () => self.CONSUME(LessThan)},
-          {ALT: () => self.CONSUME(GreaterThan)}
+          {ALT: () => self.CONSUME(GreaterThan)},
+          {ALT: () => self.CONSUME(In)}
         ])
     })
     
@@ -95,17 +128,7 @@ class CQLParser extends Parser {
         {ALT: () => self.CONSUME(Or)}
       ])
     })
-
-    self.RULE("predicateOperator", () => {
-        self.OR([
-          {ALT: () => self.CONSUME(Between)},
-          {ALT: () => self.CONSUME(AtLeast)},
-          {ALT: () => self.CONSUME(AtMost)},
-          {ALT: () => self.CONSUME(AllOf)},
-          {ALT: () => self.CONSUME(Unique)}
-        ])
-    })
-
+    
     this.performSelfAnalysis(this)
   }
 }

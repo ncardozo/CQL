@@ -1,3 +1,4 @@
+//https://sap.github.io/chevrotain/playground/
 (function calculatorExampleCst() {
   "use strict";
   
@@ -58,7 +59,7 @@ let allTokens = [WhiteSpace,
     self.RULE("query", () => {
       self.CONSUME(Activate)
       self.CONSUME(Identifier)
-      self.OPTION( () => {
+      self.OPTION1(() => {
       	self.SUBRULE(self.expressionStatement)
       })
       self.OPTION2(() => {
@@ -70,30 +71,51 @@ let allTokens = [WhiteSpace,
       self.CONSUME(For)
       self.CONSUME(Identifier)
     })
-
+    
     self.RULE("expressionStatement", () => {
-      self.AT_LEAST_ONE_SEP({
-       	SEP: Or,
-	    DEF: () => self.OR([
-        	{ALT: () => self.SUBRULE(self.binaryExpression) },
-        	{ALT: () => self.SUBRULE(self.predicateExpression) }
-      	])
-      })
+      self.OPTION1(() => { self.CONSUME(LParenthesis) })
+      self.OR([
+        {ALT: () => self.SUBRULE(self.binaryExpression)},
+        {ALT: () => self.SUBRULE(self.predicateExpression)}
+        ])
+      self.OPTION2(() => { self.CONSUME(RParenthesis) })
     })
 
     self.RULE("binaryExpression", () => {
-      self.SUBRULE(self.binaryOperator)
-      self.OR([
-        	{ALT: () => self.CONSUME(Identifier) },
-        	{ALT: () => self.SUBRULE(self.predicateExpression) }
-      	])
+      self.AT_LEAST_ONE_SEP({
+	       	SEP: Or,
+		    DEF: () => { 
+              self.CONSUME(Identifier)
+			self.SUBRULE(self.binaryOperator)
+	        
+         }
+      }) 
     })
 
     self.RULE("predicateExpression", () => {
-        self.SUBRULE(self.predicateOperator)
-      	self.OPTION(() =>
-	      self.SUBRULE(self.predicateParameters)
-      	)
+        self.AT_LEAST_ONE_SEP({
+	       	SEP: Comma,
+		    DEF: () => self.OR([
+                {ALT:() => self.SUBRULE(self.uniPredicate) },
+                {ALT:() => self.SUBRULE(self.paramPredicate) }
+            ]) 
+        })
+    })
+    
+    self.RULE("paramPredicate", () => {
+	  self.OR([
+        {ALT: () => self.CONSUME(Between)},
+        {ALT: () => self.CONSUME(AtLeast)},
+        {ALT: () => self.CONSUME(AtMost)}
+      ])
+      self.SUBRULE(self.predicateParameters) 
+    })
+              
+    self.RULE("uniPredicate", () => {
+      self.OR([
+        {ALT: () => self.CONSUME(AllOf)},
+        {ALT: () => self.CONSUME(Unique)}
+      ])
     })
 
     self.RULE("predicateParameters", () => {
@@ -124,16 +146,6 @@ let allTokens = [WhiteSpace,
       ])
     })
     
-    self.RULE("predicateOperator", () => {
-      self.OR([
-        {ALT: () => self.CONSUME(Between)},
-        {ALT: () => self.CONSUME(AtLeast)},
-        {ALT: () => self.CONSUME(AtMost)},
-        {ALT: () => self.CONSUME(AllOf)},
-        {ALT: () => self.CONSUME(Unique)}
-      ])
-    })
-
     this.performSelfAnalysis(this)
   }
 }
@@ -177,15 +189,15 @@ class CQLInterpreter extends BaseCstVisitor {
       instance: ctx.Identifier[0].image
     }
   }
-
+	  
   expressionStatement(ctx) {
       let binExp = this.visit(ctx.binaryExpression)
-      //let predExp = this.visit(ctx.predicateExpression)
-      let expressions = ctx.predicateExpression.map(stmt => this.visit(ctx.predicateExpression))
+      let predExp = this.visit(ctx.predicateExpression)
+
       return {
         type: "EXPRESSION",
         binaryExpression: binExp,
-        predicateExpression: expressions
+        predicateExpressions: predExp
       }
   }
 
@@ -200,17 +212,43 @@ class CQLInterpreter extends BaseCstVisitor {
     }
   }
 
+  
   predicateExpression(ctx) {
-    let predicate = this.visit(ctx.predicateOperator)
-    let params = this.visit(ctx.predicateParameters)
-    
+    let predicate
+    if(ctx.paramPredicate) 
+		predicate = this.visit(ctx.paramPredicate)
+    else
+      	predicate = this.visit(ctx.uniPredicate)
+	predicate = ctx.paramPredicate.map(it => this.visit(it))
     return {
       type: "PREDICATE_EXPRESSION",
       predicate: predicate,
-      conditions: params
     }
   }
 
+  uniPredicate(ctx) {
+    if(ctx.Unique)
+      return ctx.Unique[0].image
+    else
+      return ctx.AllOf[0].image
+  }
+  
+  paramPredicate(ctx) {
+    let params = this.visit(ctx.predicateParameters)
+	let name
+
+    if(ctx.Between)
+        name = ctx.Between[0].image
+    else if(ctx.AtLeastOne)
+        name = ctx.AtLeastOne[0].image
+    else 
+        name = ctx.AtMostOne[0].image
+    return {
+      name: name,
+      params: params
+    }
+  }
+  
   predicateParameters(ctx) {
     let conditions = ctx.Integer.map(intToken => intToken.image)
 	  return {
@@ -223,19 +261,6 @@ class CQLInterpreter extends BaseCstVisitor {
       return ctx.Integer[0].image
     else
       return ctx.Identifier[0].image
-  }
-
-  predicateOperator(ctx) {
-      if(ctx.Between)
-        return ctx.Between[0].image
-      else if(ctx.AtLeastOne)
-        return ctx.AtLeastOne[0].image
-      else if(ctx.AtMostOne)
-        return ctx.AtMostOne[0].image
-      else if(ctx.Unique)
-        return ctx.Unique[0].image
-      else
-        return ctx.AllOf[0].image
   }
 
   binaryOperator(ctx) {
@@ -271,5 +296,4 @@ const toAstVisitorInstance = new CQLInterpreter()
 
 //INPUT:
 //activate: name = Curtains
-
-
+//activate: date (between(2,3),between(6,9))

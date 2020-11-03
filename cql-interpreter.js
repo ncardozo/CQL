@@ -16,6 +16,10 @@ class CQLInterpreter extends BaseCQLVisitor {
     let operation = str.substring(0, str.length-1)
     let contextName = ctx.Identifier[0].image
     let predicate = this.visit(ctx.expressionStatement)
+    /*let predicates = ctx.expressionStatement.map(exp => {
+      console.log(exp.children)
+      //this.visit(ctx.expressionStatement)
+    })*/
     let forStatement = this.visit(ctx.forStatement)
     if(predicate)
       switch(predicate) {
@@ -42,12 +46,12 @@ class CQLInterpreter extends BaseCQLVisitor {
   }
 
   expressionStatement(ctx) {
-      let binExp = this.visit(ctx.binaryExpression)
-      let predExp = this.visit(ctx.predicateExpression)
+    let binExp = this.visit(ctx.binaryExpression)
+    let predExp = this.visit(ctx.predicateExpression)
 
-      if(predExp)
-        return predExp
-      else return binExp
+    if(predExp)
+      return predExp
+    else return binExp
   }
 
   binaryExpression(ctx) {
@@ -62,19 +66,41 @@ class CQLInterpreter extends BaseCQLVisitor {
   }
 
   predicateExpression(ctx) {
-    let predicate = this.visit(ctx.predicateOperator)
-    let params = this.visit(ctx.predicateParameters)
-    if(predicate)
-      return predicate
+    let predicate = ctx.paramPredicate.map(it => this.visit(it))
+    return {
+      type: "PREDICATE_EXPRESSION",
+      predicate: predicate,
+    }
+  }
+
+  uniPredicate(ctx) {
+    if(ctx.Unique)
+      return ctx.Unique[0].image
     else
-      return `${predicate}(${params})`
+      return ctx.AllOf[0].image
+  }
+  
+  paramPredicate(ctx) {
+    let params = this.visit(ctx.predicateParameters)
+	  let name
+
+    if(ctx.Between)
+        name = ctx.Between[0].image
+    else if(ctx.AtLeastOne)
+        name = ctx.AtLeastOne[0].image
+    else 
+        name = ctx.AtMostOne[0].image
+    return {
+      predName: name,
+      params: params
+    }
   }
 
   predicateParameters(ctx) {
-    let conditions = ctx.Integer.map(intToken => intToken.image)
-	  return {
-      parameters: conditions
-    }
+    let params = ctx.Integer.map(intToken => {
+      intToken.image
+    })
+	  return params 
   }
 
   atomicExpression(ctx) {
@@ -84,26 +110,20 @@ class CQLInterpreter extends BaseCQLVisitor {
       return ctx.Identifier[0].image
   }
 
-  predicateOperator(ctx) {
-      if(ctx.Between)
-        return ctx.Between[0].image
-      else if(ctx.AtLeastOne)
-        return ctx.AtLeastOne[0].image
-      else if(ctx.AtMostOne)
-        return ctx.AtMostOne[0].image
-      else if(ctx.Unique)
-        return ctx.Unique[0].image
-      else
-        return ctx.AllOf[0].image
-  }
-
   binaryOperator(ctx) {
     if(ctx.Equals)
       return ctx.Equals[0].image
     else if(ctx.GreaterThan)
       return ctx.GreaterThan[0].image
-    else if(ctx.LessThan)
-      return cxt.LessThan[0].image
+    else if(ctx.In)
+      return ctx.In[0].image
+    else 
+      return ctx.LessThan[0].image
+  }
+  
+  connector(ctx) {
+  	if(ctx.Or)
+      return ctx.Or[0].image
     else
       return ctx.And[0].image
   }
