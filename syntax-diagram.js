@@ -212,14 +212,8 @@ class CQLInterpreter extends BaseCstVisitor {
     }
   }
 
-  
   predicateExpression(ctx) {
-    let predicate
-    if(ctx.paramPredicate) 
-		predicate = this.visit(ctx.paramPredicate)
-    else
-      	predicate = this.visit(ctx.uniPredicate)
-	predicate = ctx.paramPredicate.map(it => this.visit(it))
+    let predicate = ctx.paramPredicate.map(it => this.visit(it))
     return {
       type: "PREDICATE_EXPRESSION",
       predicate: predicate,
@@ -235,7 +229,7 @@ class CQLInterpreter extends BaseCstVisitor {
   
   paramPredicate(ctx) {
     let params = this.visit(ctx.predicateParameters)
-	let name
+	  let name
 
     if(ctx.Between)
         name = ctx.Between[0].image
@@ -244,16 +238,13 @@ class CQLInterpreter extends BaseCstVisitor {
     else 
         name = ctx.AtMostOne[0].image
     return {
-      name: name,
+      predName: name,
       params: params
     }
   }
   
   predicateParameters(ctx) {
-    let conditions = ctx.Integer.map(intToken => intToken.image)
-	  return {
-      parameters: conditions
-    }
+    return ctx.Integer.map(intToken => intToken.image)
   }
 
   atomicExpression(ctx) {
