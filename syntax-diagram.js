@@ -73,12 +73,16 @@ let allTokens = [WhiteSpace,
     })
     
     self.RULE("expressionStatement", () => {
-      self.OPTION1(() => { self.CONSUME(LParenthesis) })
+      self.OPTION(() => { self.CONSUME(LParenthesis) })
       self.OR([
         {ALT: () => self.SUBRULE(self.binaryExpression)},
         {ALT: () => self.SUBRULE(self.predicateExpression)}
         ])
-      self.OPTION2(() => { self.CONSUME(RParenthesis) })
+      self.OPTION1(() => { self.CONSUME(RParenthesis) })
+      self.OPTION2(() => {
+      	self.CONSUME(And)
+        self.SUBRULE(self.uniPredicate)
+      })
     })
 
     self.RULE("binaryExpression", () => {
@@ -94,7 +98,7 @@ let allTokens = [WhiteSpace,
 
     self.RULE("predicateExpression", () => {
         self.AT_LEAST_ONE_SEP({
-	       	SEP: Comma,
+	       	SEP: Comma, //self.connector,
 		    DEF: () => self.OR([
                 {ALT:() => self.SUBRULE(self.uniPredicate) },
                 {ALT:() => self.SUBRULE(self.paramPredicate) }
@@ -193,11 +197,13 @@ class CQLInterpreter extends BaseCstVisitor {
   expressionStatement(ctx) {
       let binExp = this.visit(ctx.binaryExpression)
       let predExp = this.visit(ctx.predicateExpression)
+      let secondPred = this.visit(ctx.uniPredicate)
 
       return {
         type: "EXPRESSION",
         binaryExpression: binExp,
-        predicateExpressions: predExp
+        predicateExpressions: predExp,
+        secondPredicate: secondPred
       }
   }
 
@@ -288,3 +294,4 @@ const toAstVisitorInstance = new CQLInterpreter()
 //INPUT:
 //activate: name = Curtains
 //activate: date (between(2,3),between(6,9))
+//activate: date between(2,3) and unique

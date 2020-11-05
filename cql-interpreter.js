@@ -33,23 +33,37 @@ class CQLInterpreter extends BaseCQLVisitor {
             }
           })
         })
-        return str
-      } else {
-        switch(predicate.predicate) {
+      } else if(typeof predicate.predicate == "string") {
+          //console.log("JUST THE SECOND PREDICATE" + predicate.predicate)
+          switch(predicate.predicate) {
+            case "unique": 
+              this.manager.contexts.forEach(context => {
+                if(context.isActive())
+                  str += `${context.name}.deactivate();`
+              })
+              str += `${contextName}.${operation}();`
+            case "allOf":
+              str += `${contextName}.${operation}();`
+            default:
+              break
+          }
+      } 
+      if(predicate.secondPredicate) {
+        switch(predicate.secondPredicate) {
           case "unique": 
             this.manager.contexts.forEach(context => {
               if(context.isActive())
                 str += `${context.name}.deactivate();`
             })
-            str += `${contextName}.${operation}();`
-            return str
+            break
           case "allOf":
             str += `${contextName}.${operation}();`
-            return str
+            break
           default:
             break
         }
       } 
+      return str
     } else
       return `${contextName}.${operation}()`
   }
@@ -64,10 +78,17 @@ class CQLInterpreter extends BaseCQLVisitor {
   expressionStatement(ctx) {
     let binExp = this.visit(ctx.binaryExpression)
     let predExp = this.visit(ctx.predicateExpression)
-
+    let secondPred = this.visit(ctx.uniPredicate)
+    
+    let expression = {}
     if(predExp)
-      return predExp
-    else return binExp
+      expression.predicate = predExp.predicate
+    if(secondPred) 
+      expression.secondPredicate = secondPred
+    if(binExp) 
+      expression.binary = binExp
+    
+    return expression
   }
 
   binaryExpression(ctx) {

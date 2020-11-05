@@ -49,12 +49,16 @@ class CQLParser extends Parser {
     })
 
     self.RULE("expressionStatement", () => {
-      self.OPTION1(() => { self.CONSUME(LParenthesis) })
+      self.OPTION(() => { self.CONSUME(LParenthesis) })
       self.OR([
         {ALT: () => self.SUBRULE(self.binaryExpression)},
         {ALT: () => self.SUBRULE(self.predicateExpression)}
         ])
-      self.OPTION2(() => { self.CONSUME(RParenthesis) })
+      self.OPTION1(() => { self.CONSUME(RParenthesis) })
+      self.OPTION2(() => {
+      	self.CONSUME(And)
+        self.SUBRULE(self.uniPredicate)
+      })
     })
 
     self.RULE("binaryExpression", () => {
