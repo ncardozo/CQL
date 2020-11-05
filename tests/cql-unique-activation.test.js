@@ -18,7 +18,6 @@ test(`---PREDICATE UNIQUE: uniquely activate Context 2`, () => {
     let statement = CQL.interpret(cql, activationStatement)
 
     //function to activate
-    console.log(statement)
     eval(statement)
     expect(Context1.isActive()).toBe(false)
     expect(Context2.isActive()).toBe(true)

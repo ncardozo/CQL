@@ -17,7 +17,7 @@ class CQLInterpreter extends BaseCQLVisitor {
     let contextName = ctx.Identifier[0].image
     let predicate = this.visit(ctx.expressionStatement)
     let forStatement = this.visit(ctx.forStatement)
-    console.log(predicate)
+    //console.log(predicate)
     if(predicate) {
       let str = ''
       if(Array.isArray(predicate.predicate)) { //between
@@ -33,24 +33,24 @@ class CQLInterpreter extends BaseCQLVisitor {
             }
           })
         })
-        console.log(str)
         return str
-      }
-    }
-    /*
-    switch(predicate) {
-        case "unique": 
-          let str = ``
-          this.manager.contexts.forEach(context => {
-            if(context.isActive())
-              str += `${context.name}.deactivate();`
-          })
-          str += `${contextName}.${operation}();`
-          return str
-        case "between":
-          break
-      }*/
-    else
+      } else {
+        switch(predicate.predicate) {
+          case "unique": 
+            this.manager.contexts.forEach(context => {
+              if(context.isActive())
+                str += `${context.name}.deactivate();`
+            })
+            str += `${contextName}.${operation}();`
+            return str
+          case "allOf":
+            str += `${contextName}.${operation}();`
+            return str
+          default:
+            break
+        }
+      } 
+    } else
       return `${contextName}.${operation}()`
   }
 
@@ -82,7 +82,11 @@ class CQLInterpreter extends BaseCQLVisitor {
   }
 
   predicateExpression(ctx) {
-    let predicate = ctx.paramPredicate.map(it => this.visit(it))
+    let predicate
+    if(Array.isArray(ctx.paramPredicate))
+      predicate = ctx.paramPredicate.map(it => this.visit(it))
+    else
+      predicate = this.visit(ctx.uniPredicate)
     return {
       type: "PREDICATE_EXPRESSION",
       predicate: predicate,
@@ -99,7 +103,6 @@ class CQLInterpreter extends BaseCQLVisitor {
   paramPredicate(ctx) {
     let params = this.visit(ctx.predicateParameters)
 	  let name
-    console.log(params)
     if(ctx.Between)
         name = ctx.Between[0].image
     else if(ctx.AtLeastOne)
