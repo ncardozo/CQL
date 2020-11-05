@@ -12,17 +12,33 @@ class CQLInterpreter extends BaseCQLVisitor {
   }
 
   query(ctx) {
-    let str = ctx.Activate[0].image
-    let operation = str.substring(0, str.length-1)
+    let op = ctx.Activate[0].image
+    let operation = op.substring(0, op.length-1)
     let contextName = ctx.Identifier[0].image
     let predicate = this.visit(ctx.expressionStatement)
-    /*let predicates = ctx.expressionStatement.map(exp => {
-      console.log(exp.children)
-      //this.visit(ctx.expressionStatement)
-    })*/
     let forStatement = this.visit(ctx.forStatement)
-    if(predicate)
-      switch(predicate) {
+    console.log(predicate)
+    if(predicate) {
+      let str = ''
+      if(Array.isArray(predicate.predicate)) { //between
+        this.manager.contexts.forEach(context => {
+          let val = context.interface
+          predicate.predicate.forEach( pred => {
+            let min = pred.params[0]
+            let max = pred.params[1]  
+            if( min <= val && max >= val) {
+              let cont = `${context}`
+              cont = cont.split(" ")[0]
+              str += `${cont}.${operation}();`
+            }
+          })
+        })
+        console.log(str)
+        return str
+      }
+    }
+    /*
+    switch(predicate) {
         case "unique": 
           let str = ``
           this.manager.contexts.forEach(context => {
@@ -33,7 +49,7 @@ class CQLInterpreter extends BaseCQLVisitor {
           return str
         case "between":
           break
-      }
+      }*/
     else
       return `${contextName}.${operation}()`
   }
@@ -83,7 +99,7 @@ class CQLInterpreter extends BaseCQLVisitor {
   paramPredicate(ctx) {
     let params = this.visit(ctx.predicateParameters)
 	  let name
-
+    console.log(params)
     if(ctx.Between)
         name = ctx.Between[0].image
     else if(ctx.AtLeastOne)
@@ -97,10 +113,7 @@ class CQLInterpreter extends BaseCQLVisitor {
   }
 
   predicateParameters(ctx) {
-    let params = ctx.Integer.map(intToken => {
-      intToken.image
-    })
-	  return params 
+    return ctx.Integer.map(intToken => intToken.image)
   }
 
   atomicExpression(ctx) {
