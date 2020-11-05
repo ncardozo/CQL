@@ -41,7 +41,7 @@ const Integer = createToken({name: "Integer", pattern: /0|[1-9]\d*/})
 
 let allTokens = [WhiteSpace, 
   Activate, For, GreaterThan, LessThan, Between,
-  AtLeast, AtMost, AllOf, Unique, Equals, And, Or, In, Identifier, Integer, Comma, LParenthesis,
+  AtLeast, AtMost, AllOf, Unique, Equals, And, Or, Identifier, Integer, Comma, LParenthesis,
   RParenthesis]
 
 const CQLLexer = new Lexer(allTokens)

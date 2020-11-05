@@ -110,8 +110,7 @@ class CQLParser extends Parser {
         self.OR([
           {ALT: () => self.CONSUME(Equals)},
           {ALT: () => self.CONSUME(LessThan)},
-          {ALT: () => self.CONSUME(GreaterThan)},
-          {ALT: () => self.CONSUME(In)}
+          {ALT: () => self.CONSUME(GreaterThan)}
         ])
     })
     
